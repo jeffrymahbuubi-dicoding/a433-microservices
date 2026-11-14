@@ -1,0 +1,18 @@
+$ curl -s -X POST http://127.0.0.1:80/order -H 'Content-Type: application/json' -d @order.json
+--- request body
+{
+    "order": {
+        "book_name": "Harry Potter",
+        "author": "J.K Rowling",
+        "buyer": "Fikri Helmi Setiawan",
+        "shipping_address": "Jl. Batik Kumeli no 50 Bandung"
+    }
+}
+
+--- status: 200
+--- body
+{"book_name":"Harry Potter","author":"J.K Rowling","buyer":"Fikri Helmi Setiawan","shipping_address":"Jl. Batik Kumeli no 50 Bandung"}
+$ curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:80/
+404
+$ curl -s -o /dev/null -w '%{http_code}' -X POST http://127.0.0.1:80/order/x
+404

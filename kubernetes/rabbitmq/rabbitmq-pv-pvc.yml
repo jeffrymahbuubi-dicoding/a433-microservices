@@ -1,0 +1,32 @@
+# Persistent Volume (PV) dan Persistent Volume Claim (PVC) agar data RabbitMQ tidak hilang saat Pod dibuat ulang.
+# Pola yang sama dengan mongo-pv-pvc.yml di Proyek Kedua (lesson 7.9 dan 7.11).
+apiVersion: v1                      # versi API untuk PersistentVolume
+kind: PersistentVolume              # jenis object: PersistentVolume (penyimpanan di level Cluster, tanpa Namespace)
+metadata:
+  name: rabbitmq-pv                 # nama PV
+  labels:
+    type: local                     # menandakan penyimpanan lokal di node minikube
+    app: rabbitmq
+spec:
+  storageClassName: manual          # Storage Class "manual": PV ini hanya dipasangkan dengan PVC yang meminta class yang sama
+  capacity:
+    storage: 1Gi                    # kapasitas penyimpanan 1 GiB
+  accessModes:
+    - ReadWriteOnce                 # dapat di-mount baca-tulis oleh satu node
+  hostPath:
+    path: "/mnt/data/rabbitmq"      # direktori di node minikube tempat data disimpan
+---
+apiVersion: v1                      # versi API untuk PersistentVolumeClaim
+kind: PersistentVolumeClaim         # jenis object: PVC (permintaan penyimpanan oleh Pod)
+metadata:
+  name: rabbitmq-pv-claim           # nama PVC, dirujuk oleh StatefulSet
+  namespace: ecommerce              # PVC berada di dalam Namespace (PV tidak)
+  labels:
+    app: rabbitmq
+spec:
+  storageClassName: manual          # harus sama dengan PV agar terpasang ke rabbitmq-pv
+  accessModes:
+    - ReadWriteOnce                 # access mode yang diminta, sama dengan PV
+  resources:
+    requests:
+      storage: 1Gi                  # ukuran yang diminta (<= kapasitas PV)

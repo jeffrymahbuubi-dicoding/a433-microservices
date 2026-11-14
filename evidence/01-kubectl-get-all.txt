@@ -1,0 +1,29 @@
+$ kubectl --request-timeout=30s get all,pvc -n ecommerce -o wide
+NAME                                   READY   STATUS    RESTARTS   AGE    IP            NODE       NOMINATED NODE   READINESS GATES
+pod/order-service-7999d6fb86-2jvwl     2/2     Running   0          68s    10.244.0.13   minikube   <none>           <none>
+pod/rabbitmq-0                         2/2     Running   0          110s   10.244.0.12   minikube   <none>           <none>
+pod/shipping-service-54684bbdc-692vb   2/2     Running   0          68s    10.244.0.14   minikube   <none>           <none>
+
+NAME                       TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)              AGE    SELECTOR
+service/order-service      ClusterIP   10.107.204.160   <none>        3000/TCP             68s    app=order-service
+service/rabbitmq           ClusterIP   None             <none>        5672/TCP,15672/TCP   110s   app=rabbitmq
+service/shipping-service   ClusterIP   10.106.56.71     <none>        3001/TCP             68s    app=shipping-service
+
+NAME                               READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS         IMAGES                                                    SELECTOR
+deployment.apps/order-service      1/1     1            1           68s   order-service      ghcr.io/jeffrymahbuubi-dicoding/order-service:latest      app=order-service
+deployment.apps/shipping-service   1/1     1            1           68s   shipping-service   ghcr.io/jeffrymahbuubi-dicoding/shipping-service:latest   app=shipping-service
+
+NAME                                         DESIRED   CURRENT   READY   AGE   CONTAINERS         IMAGES                                                    SELECTOR
+replicaset.apps/order-service-7999d6fb86     1         1         1       68s   order-service      ghcr.io/jeffrymahbuubi-dicoding/order-service:latest      app=order-service,pod-template-hash=7999d6fb86
+replicaset.apps/shipping-service-54684bbdc   1         1         1       68s   shipping-service   ghcr.io/jeffrymahbuubi-dicoding/shipping-service:latest   app=shipping-service,pod-template-hash=54684bbdc
+
+NAME                        READY   AGE    CONTAINERS   IMAGES
+statefulset.apps/rabbitmq   1/1     110s   rabbitmq     rabbitmq:3.11-management
+
+NAME                                      STATUS   VOLUME        CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE    VOLUMEMODE
+persistentvolumeclaim/rabbitmq-pv-claim   Bound    rabbitmq-pv   1Gi        RWO            manual         <unset>                 110s   Filesystem
+
+$ kubectl --request-timeout=30s get pv
+NAME          CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                         STORAGECLASS   VOLUMEATTRIBUTESCLASS   REASON   AGE
+rabbitmq-pv   1Gi        RWO            Retain           Bound    ecommerce/rabbitmq-pv-claim   manual         <unset>                          110s
+

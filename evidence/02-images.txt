@@ -1,0 +1,4 @@
+order-service image : ghcr.io/jeffrymahbuubi-dicoding/order-service:latest
+order-service imageID: ghcr.io/jeffrymahbuubi-dicoding/order-service@sha256:eb8963dbe499731c7354e4ea190d6308c8723f760238975ebb662edd19ed4508
+shipping-service image : ghcr.io/jeffrymahbuubi-dicoding/shipping-service:latest
+shipping-service imageID: ghcr.io/jeffrymahbuubi-dicoding/shipping-service@sha256:8d9a8dbfa6ad00d4021e2b35fe4823c54ba93bac732d2e07c1db156b17607c11

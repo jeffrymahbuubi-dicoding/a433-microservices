@@ -1,0 +1,20 @@
+# Headless Service untuk RabbitMQ (lesson 7.11). clusterIP: None membuat DNS "rabbitmq" langsung menunjuk ke Pod
+# StatefulSet, sehingga order-service dan shipping-service terhubung ke amqp://...@rabbitmq:5672.
+apiVersion: v1                      # versi API untuk Service
+kind: Service                       # jenis object: Service
+metadata:
+  name: rabbitmq                    # nama Service = hostname RabbitMQ di dalam Cluster
+  namespace: ecommerce              # Namespace tempat Service dibuat
+  labels:
+    app: rabbitmq
+spec:
+  clusterIP: None                   # Headless Service (tanpa ClusterIP), dibutuhkan oleh StatefulSet
+  selector:
+    app: rabbitmq                   # meneruskan traffic ke Pod berlabel app=rabbitmq
+  ports:
+    - name: tcp-amqp                # awalan "tcp-" membuat Istio memperlakukan AMQP sebagai TCP biasa (Istio docs, Protocol Selection)
+      port: 5672                    # port AMQP, dipakai kedua service aplikasi
+      targetPort: 5672              # port container RabbitMQ
+    - name: http-management         # awalan "http-" untuk antarmuka web manajemen RabbitMQ
+      port: 15672                   # port UI manajemen
+      targetPort: 15672             # port container untuk UI manajemen

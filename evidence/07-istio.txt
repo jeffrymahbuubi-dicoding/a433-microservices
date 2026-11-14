@@ -1,0 +1,35 @@
+$ istioctl version
+client version: 1.31.4
+control plane version: 1.31.4
+data plane version: 1.31.4 (5 proxies)
+
+$ kubectl --request-timeout=30s get gateway,virtualservice -n ecommerce
+NAME                                            AGE
+gateway.networking.istio.io/ecommerce-gateway   49s
+
+NAME                                               GATEWAYS                HOSTS   AGE
+virtualservice.networking.istio.io/order-service   ["ecommerce-gateway"]   ["*"]   49s
+
+$ kubectl --request-timeout=30s get pods -n istio-system
+NAME                                    READY   STATUS    RESTARTS   AGE
+istio-egressgateway-56d85f45d-f497x     1/1     Running   0          17m
+istio-ingressgateway-7885659474-l94lx   1/1     Running   0          17m
+istiod-558b5675df-qn6sj                 1/1     Running   0          18m
+
+$ istioctl analyze -n ecommerce
+
+✔ No validation issues found when analyzing namespace: ecommerce.
+
+$ istioctl proxy-status
+NAME                                                   CLUSTER        ISTIOD                      VERSION     SUBSCRIBED TYPES
+istio-egressgateway-56d85f45d-f497x.istio-system       Kubernetes     istiod-558b5675df-qn6sj     1.31.4      3 (CDS,LDS,EDS)
+istio-ingressgateway-7885659474-l94lx.istio-system     Kubernetes     istiod-558b5675df-qn6sj     1.31.4      4 (CDS,LDS,EDS,RDS)
+order-service-7999d6fb86-2jvwl.ecommerce               Kubernetes     istiod-558b5675df-qn6sj     1.31.4      4 (CDS,LDS,EDS,RDS)
+rabbitmq-0.ecommerce                                   Kubernetes     istiod-558b5675df-qn6sj     1.31.4      4 (CDS,LDS,EDS,RDS)
+shipping-service-54684bbdc-692vb.ecommerce             Kubernetes     istiod-558b5675df-qn6sj     1.31.4      4 (CDS,LDS,EDS,RDS)
+
+$ kubectl get namespace ecommerce -o jsonpath='{.metadata.labels.istio-injection}'
+enabled
+rabbitmq containers: rabbitmq istio-init istio-proxy
+order-service containers: order-service istio-init istio-proxy
+shipping-service containers: shipping-service istio-init istio-proxy

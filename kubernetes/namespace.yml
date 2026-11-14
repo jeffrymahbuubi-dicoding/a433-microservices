@@ -1,0 +1,9 @@
+# Namespace "ecommerce": satu ruang kerja terpisah untuk seluruh aplikasi E-Commerce (RabbitMQ, order-service,
+# shipping-service, dan resource Istio). Sumber: lesson 7.6 (Namespace) dan lesson 9.6 (label istio-injection).
+apiVersion: v1                      # versi API untuk Namespace
+kind: Namespace                     # jenis object: Namespace
+metadata:
+  name: ecommerce                   # nama Namespace, dirujuk oleh metadata.namespace di semua manifest lain
+  labels:
+    app: ecommerce                  # label pengelompokan, gaya yang sama dengan contoh lesson 7.6
+    istio-injection: enabled        # Istio otomatis menyisipkan sidecar proxy ke setiap Pod baru di Namespace ini (lesson 9.6 langkah 5, versi deklaratif dari "kubectl label namespace ... istio-injection=enabled")

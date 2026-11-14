@@ -1,0 +1,17 @@
+# Service ClusterIP untuk order-service. Dirujuk oleh VirtualService order-service (istio/order-virtualservice.yml)
+# sebagai tujuan route /order dari Istio Ingress Gateway.
+apiVersion: v1                      # versi API untuk Service (lesson 7.5)
+kind: Service                       # jenis object: Service
+metadata:
+  name: order-service               # nama Service = hostname order-service di dalam Cluster
+  namespace: ecommerce              # Namespace tempat Service dibuat
+  labels:
+    app: order-service
+spec:
+  type: ClusterIP                   # hanya dapat diakses dari dalam Cluster (tipe bawaan)
+  selector:
+    app: order-service              # meneruskan traffic ke Pod berlabel app=order-service
+  ports:
+    - name: http                    # nama port "http" agar Istio mengenali protokolnya (lesson 9.7)
+      port: 3000                    # port Service di dalam Cluster
+      targetPort: 3000              # port container

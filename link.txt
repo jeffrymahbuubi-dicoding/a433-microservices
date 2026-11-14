@@ -1,0 +1,8 @@
+Container image (GitHub Packages / GitHub Container Registry, public):
+- order-service    : https://github.com/orgs/jeffrymahbuubi-dicoding/packages/container/package/order-service
+                     ghcr.io/jeffrymahbuubi-dicoding/order-service:latest
+- shipping-service : https://github.com/orgs/jeffrymahbuubi-dicoding/packages/container/package/shipping-service
+                     ghcr.io/jeffrymahbuubi-dicoding/shipping-service:latest
+
+Repository: https://github.com/jeffrymahbuubi-dicoding/a433-microservices
+(branch order-service, shipping-service, proyek-akhir)

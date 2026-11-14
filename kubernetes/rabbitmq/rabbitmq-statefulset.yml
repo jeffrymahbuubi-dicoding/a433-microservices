@@ -1,0 +1,53 @@
+# StatefulSet untuk RabbitMQ: Pod memiliki identitas tetap (rabbitmq-0) dan penyimpanan persisten (lesson 7.11).
+# RabbitMQ adalah message broker antara order-service (producer) dan shipping-service (consumer), queue "order".
+apiVersion: apps/v1                 # versi API untuk StatefulSet
+kind: StatefulSet                   # jenis object: StatefulSet (untuk aplikasi stateful)
+metadata:
+  name: rabbitmq                    # nama StatefulSet; Pod-nya bernama rabbitmq-0
+  namespace: ecommerce              # Namespace tempat StatefulSet dibuat
+  labels:
+    app: rabbitmq
+spec:
+  serviceName: rabbitmq             # Headless Service yang mengatur identitas jaringan Pod (rabbitmq-service.yml)
+  replicas: 1                       # satu replica cukup karena PV hanya ReadWriteOnce
+  selector:
+    matchLabels:
+      app: rabbitmq                 # StatefulSet mengelola Pod berlabel app=rabbitmq
+  template:
+    metadata:
+      labels:
+        app: rabbitmq               # label Pod, harus sama dengan selector dan selector Service
+    spec:
+      terminationGracePeriodSeconds: 10   # waktu tunggu sebelum Pod dihentikan paksa
+      containers:
+        - name: rabbitmq            # nama container
+          image: rabbitmq:3.11-management   # RabbitMQ 3.11 dengan plugin management, sesuai ketentuan brief
+          ports:
+            - name: amqp            # nama port AMQP
+              containerPort: 5672   # port AMQP yang dibuka container
+            - name: management      # nama port UI manajemen
+              containerPort: 15672  # port UI manajemen yang dibuka container
+          env:
+            - name: RABBITMQ_DEFAULT_USER       # user awal RabbitMQ (menggantikan guest)
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-secret         # nama Secret (rabbitmq-secret.yml)
+                  key: RABBITMQ_DEFAULT_USER    # key di dalam Secret
+            - name: RABBITMQ_DEFAULT_PASS       # password awal RabbitMQ
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-secret         # nama Secret yang sama
+                  key: RABBITMQ_DEFAULT_PASS    # key di dalam Secret
+          readinessProbe:                       # Pod dianggap Ready hanya jika pemeriksaan berhasil (lesson 7.8)
+            exec:
+              command: ["rabbitmq-diagnostics", "-q", "check_port_connectivity"]   # perintah cek port dari dokumentasi RabbitMQ (Monitoring / Health Checks)
+            initialDelaySeconds: 20             # tunggu 20 detik setelah container mulai sebelum pemeriksaan pertama
+            periodSeconds: 10                   # ulangi pemeriksaan setiap 10 detik
+            timeoutSeconds: 10                  # perintah dianggap gagal bila lebih dari 10 detik
+          volumeMounts:
+            - name: rabbitmq-data   # Persistent Volume untuk data RabbitMQ
+              mountPath: /var/lib/rabbitmq   # direktori data bawaan image RabbitMQ
+      volumes:
+        - name: rabbitmq-data       # nama volume, dirujuk volumeMounts di atas
+          persistentVolumeClaim:
+            claimName: rabbitmq-pv-claim    # memakai PVC dari rabbitmq-pv-pvc.yml

@@ -1,0 +1,40 @@
+# Deployment untuk order-service (producer: menerima POST /order lalu mengirim pesan ke queue "order").
+# Image dari GitHub Packages (ghcr.io). Sidecar Istio disisipkan otomatis karena label di namespace.yml.
+apiVersion: apps/v1                 # versi API untuk Deployment (lesson 7.7)
+kind: Deployment                    # jenis object: Deployment (aplikasi stateless dengan sejumlah replica)
+metadata:
+  name: order-service               # nama Deployment
+  namespace: ecommerce              # Namespace tempat Deployment dibuat
+  labels:
+    app: order-service
+spec:
+  replicas: 1                       # jumlah Pod yang dijalankan
+  selector:
+    matchLabels:
+      app: order-service            # Deployment mengelola Pod berlabel app=order-service
+  template:
+    metadata:
+      labels:
+        app: order-service          # label Pod, dipakai juga oleh Service order-service
+      annotations:
+        proxy.istio.io/config: '{ "holdApplicationUntilProxyStarts": true }'   # container aplikasi baru jalan setelah sidecar siap, agar koneksi ke RabbitMQ tidak gagal di awal (Istio docs, ProxyConfig)
+    spec:
+      containers:
+        - name: order-service       # nama container
+          image: ghcr.io/jeffrymahbuubi-dicoding/order-service:latest   # image dari ghcr.io (saran kedua)
+          imagePullPolicy: Always   # selalu tarik image terbaru karena memakai tag latest
+          ports:
+            - containerPort: 3000   # port aplikasi di dalam container (PORT dari berkas .env)
+          env:
+            - name: RABBITMQ_USER   # user RabbitMQ, diambil dari Secret
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-secret         # nama Secret (rabbitmq-secret.yml)
+                  key: RABBITMQ_DEFAULT_USER    # key user di dalam Secret
+            - name: RABBITMQ_PASS   # password RabbitMQ, diambil dari Secret
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-secret         # nama Secret yang sama
+                  key: RABBITMQ_DEFAULT_PASS    # key password di dalam Secret
+            - name: AMQP_URL        # alamat RabbitMQ; menimpa AMQP_URL di .env. Harus setelah dua variabel yang dirujuk
+              value: amqp://$(RABBITMQ_USER):$(RABBITMQ_PASS)@rabbitmq:5672   # $(NAMA) diganti nilai variabel di atas oleh Kubernetes; host "rabbitmq" = Service rabbitmq

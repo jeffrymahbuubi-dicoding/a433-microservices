@@ -1,0 +1,17 @@
+# Service ClusterIP untuk shipping-service. Tidak dibuka lewat Gateway (hanya consumer RabbitMQ), tetapi tetap dibuat
+# agar setiap Pod dalam mesh menjadi bagian dari sebuah Service (Istio docs, Application requirements).
+apiVersion: v1                      # versi API untuk Service (lesson 7.5)
+kind: Service                       # jenis object: Service
+metadata:
+  name: shipping-service            # nama Service = hostname shipping-service di dalam Cluster
+  namespace: ecommerce              # Namespace tempat Service dibuat
+  labels:
+    app: shipping-service
+spec:
+  type: ClusterIP                   # hanya dapat diakses dari dalam Cluster (tipe bawaan)
+  selector:
+    app: shipping-service           # meneruskan traffic ke Pod berlabel app=shipping-service
+  ports:
+    - name: http                    # nama port "http" agar Istio mengenali protokolnya (lesson 9.7)
+      port: 3001                    # port Service di dalam Cluster
+      targetPort: 3001              # port container

@@ -1,0 +1,34 @@
+# Istio Ingress Gateway untuk E-Commerce App (saran keempat: Istio).
+# Bentuknya mengikuti Gateway pada lesson 9.8 (bookinfo-gateway.yaml); apiVersion mengikuti contoh resmi
+# Istio 1.31.4 (samples/bookinfo/networking/bookinfo-gateway.yaml), bukan v1alpha3 milik Istio 1.17 di lesson.
+# Gateway hanya membuka port di ingress gateway; aturan rutenya ada di order-virtualservice.yml.
+# apiVersion: grup API Istio untuk traffic management, versi stabil (v1) di Istio 1.31.4.
+apiVersion: networking.istio.io/v1
+# kind: jenis resource, yaitu Gateway (lesson 9.8 langkah 1).
+kind: Gateway
+# metadata: identitas objek.
+metadata:
+  # name: nama Gateway; dirujuk oleh VirtualService lewat field gateways.
+  name: ecommerce-gateway
+  # namespace: sama dengan seluruh aplikasi (D8), tempat sidecar injection aktif.
+  namespace: ecommerce
+# spec: isi konfigurasi Gateway.
+spec:
+  # selector: memilih pod ingress gateway yang akan memakai konfigurasi ini.
+  selector:
+    # label bawaan pod istio-ingressgateway pada profile demo (lesson 9.6 dan 9.8: "use istio default controller").
+    istio: ingressgateway
+  # servers: daftar port yang dibuka oleh gateway.
+  servers:
+    # satu server: HTTP pada port 80.
+    - port:
+        # number: port 80, sama seperti lesson 9.8 dan sesuai target minikube tunnel (127.0.0.1:80).
+        number: 80
+        # name: nama port; "http" membuat Istio memperlakukan traffic sebagai HTTP.
+        name: http
+        # protocol: protokol yang diterima, HTTP biasa tanpa TLS.
+        protocol: HTTP
+      # hosts: host yang diterima; "*" berarti semua host (cukup untuk uji lokal, seperti lesson 9.8).
+      hosts:
+        # tanda bintang dalam tanda kutip agar YAML tidak menganggapnya sebagai alias.
+        - "*"

@@ -1,0 +1,42 @@
+# VirtualService yang meneruskan POST /order dari Istio Ingress Gateway ke order-service.
+# Bentuknya mengikuti VirtualService pada lesson 9.8 (bookinfo-gateway.yaml).
+# apiVersion: grup API Istio untuk traffic management, versi stabil (v1) di Istio 1.31.4.
+apiVersion: networking.istio.io/v1
+# kind: jenis resource, yaitu VirtualService (aturan routing).
+kind: VirtualService
+# metadata: identitas objek.
+metadata:
+  # name: nama VirtualService; sama dengan nama Service tujuan agar mudah dibaca.
+  name: order-service
+  # namespace: sama dengan Gateway dan seluruh aplikasi.
+  namespace: ecommerce
+# spec: isi aturan routing.
+spec:
+  # hosts: host yang dicocokkan; "*" menerima semua host, seperti pada Gateway.
+  hosts:
+    # tanda bintang dalam tanda kutip agar YAML tidak menganggapnya sebagai alias.
+    - "*"
+  # gateways: VirtualService ini hanya berlaku untuk traffic yang masuk lewat Gateway berikut.
+  gateways:
+    # nama Gateway pada ecommerce-gateway.yml (satu namespace, jadi cukup nama pendek).
+    - ecommerce-gateway
+  # http: daftar aturan routing untuk traffic HTTP.
+  http:
+    # satu aturan: kondisi (match) lalu tujuan (route).
+    - match:
+        # uri: mencocokkan path request.
+        - uri:
+            # exact: path harus persis /order. Tip brief: "Pastikan Anda menetapkan nilai http.match.uri.exact
+            # adalah /order". Akibatnya GET / dan POST /order/x tidak cocok dan dijawab 404 oleh gateway.
+            exact: /order
+      # route: ke mana request yang cocok dikirim.
+      route:
+        # destination: tujuan request.
+        - destination:
+            # host: nama Kubernetes Service order-service. Tip brief: "nilai http.match.route.destination.host
+            # adalah nama Kubernetes Service untuk order service".
+            host: order-service
+            # port: port Service tujuan.
+            port:
+              # number: 3000, port Service order-service (bernama http).
+              number: 3000
