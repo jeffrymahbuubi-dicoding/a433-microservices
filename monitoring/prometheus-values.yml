@@ -1,0 +1,14 @@
+# Values untuk Helm chart prometheus-community/prometheus (saran ketiga: monitoring di Namespace "monitoring").
+# Install: helm install prometheus prometheus-community/prometheus -n monitoring --create-namespace -f prometheus-values.yml
+alertmanager:
+  enabled: false            # Alertmanager tidak dibutuhkan untuk proyek ini (menghemat memori minikube)
+prometheus-pushgateway:
+  enabled: false            # Pushgateway tidak dibutuhkan (tidak ada batch job yang mengirim metrics)
+kube-state-metrics:
+  enabled: true             # metrics status object Kubernetes (Deployment, Pod, dll.), dipakai dashboard Grafana 6417
+prometheus-node-exporter:
+  enabled: true             # metrics node (CPU, memori, disk) dari node minikube
+server:
+  persistentVolume:
+    enabled: false          # data Prometheus cukup disimpan sementara (emptyDir) untuk lingkungan lokal
+  retention: "2d"           # simpan metrics selama 2 hari

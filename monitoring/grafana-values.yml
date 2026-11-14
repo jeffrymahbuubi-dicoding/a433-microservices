@@ -1,0 +1,34 @@
+# Values untuk Helm chart grafana/grafana (saran ketiga), di Namespace "monitoring".
+# Install: helm install grafana grafana/grafana -n monitoring -f grafana-values.yml \
+#   --set-file dashboards.default.kubernetes-cluster-updated.json=kubernetes-cluster-6417-updated.json
+# kubernetes-cluster-6417-updated.json = template 6417 dengan nama metrics terbaru (dibuat oleh fix-6417.mjs).
+adminUser: admin            # username login Grafana
+adminPassword: admin        # password login Grafana untuk lingkungan lokal (minikube) saja
+persistence:
+  enabled: false            # dashboard dibuat ulang dari values ini, jadi tidak perlu Persistent Volume
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Prometheus                   # nama data source di Grafana
+        type: prometheus
+        url: http://prometheus-server.monitoring.svc.cluster.local   # Service Prometheus di dalam Cluster
+        access: proxy                      # Grafana yang memanggil Prometheus (bukan browser)
+        isDefault: true
+dashboardProviders:
+  dashboardproviders.yaml:
+    apiVersion: 1
+    providers:
+      - name: default                      # provider untuk dashboard yang di-import otomatis
+        orgId: 1
+        folder: ""
+        type: file
+        disableDeletion: false
+        options:
+          path: /var/lib/grafana/dashboards/default
+dashboards:
+  default:
+    kubernetes-cluster:
+      gnetId: 6417                         # template "Kubernetes Cluster (Prometheus)" dari grafana.com (tips submission)
+      revision: 1
+      datasource: Prometheus               # hubungkan template ke data source Prometheus di atas

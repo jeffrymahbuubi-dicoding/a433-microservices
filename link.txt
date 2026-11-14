@@ -1,0 +1,8 @@
+Container image (GitHub Packages / GitHub Container Registry, public):
+- Backend  : https://github.com/orgs/jeffrymahbuubi-dicoding/packages/container/package/karsajobs
+             ghcr.io/jeffrymahbuubi-dicoding/karsajobs:latest
+- Frontend : https://github.com/orgs/jeffrymahbuubi-dicoding/packages/container/package/karsajobs-ui
+             ghcr.io/jeffrymahbuubi-dicoding/karsajobs-ui:latest
+
+Repository: https://github.com/jeffrymahbuubi-dicoding/a433-microservices
+(branch karsajobs, karsajobs-ui, proyek-kedua)

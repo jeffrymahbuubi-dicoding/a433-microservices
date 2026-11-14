@@ -1,0 +1,24 @@
+NAME                                                 READY   STATUS    RESTARTS   AGE
+pod/grafana-5d48d865cf-4cw7r                         1/1     Running   0          105s
+pod/prometheus-kube-state-metrics-67df8f584c-bd74p   1/1     Running   0          107s
+pod/prometheus-prometheus-node-exporter-wjwfv        1/1     Running   0          107s
+pod/prometheus-server-d87876cb6-6s2m5                2/2     Running   0          107s
+
+NAME                                          TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+service/grafana                               ClusterIP   10.104.86.91   <none>        80/TCP     105s
+service/prometheus-kube-state-metrics         ClusterIP   10.97.251.33   <none>        8080/TCP   107s
+service/prometheus-prometheus-node-exporter   ClusterIP   10.100.135.3   <none>        9100/TCP   107s
+service/prometheus-server                     ClusterIP   10.96.118.72   <none>        80/TCP     107s
+
+NAME                                                 DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR            AGE
+daemonset.apps/prometheus-prometheus-node-exporter   1         1         1       1            1           kubernetes.io/os=linux   107s
+
+NAME                                            READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/grafana                         1/1     1            1           105s
+deployment.apps/prometheus-kube-state-metrics   1/1     1            1           107s
+deployment.apps/prometheus-server               1/1     1            1           107s
+
+NAME                                                       DESIRED   CURRENT   READY   AGE
+replicaset.apps/grafana-5d48d865cf                         1         1         1       105s
+replicaset.apps/prometheus-kube-state-metrics-67df8f584c   1         1         1       107s
+replicaset.apps/prometheus-server-d87876cb6                1         1         1       107s
