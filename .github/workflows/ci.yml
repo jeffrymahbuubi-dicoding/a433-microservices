@@ -1,0 +1,33 @@
+# Continuous Integration untuk branch karsajobs-ui (frontend Vue.js) — saran keempat submission.
+# Urutan: lint-dockerfile lalu build-app-karsajobs-ui (hanya bila lint sukses).
+name: CI karsajobs-ui
+
+on:
+  push:
+    branches: [karsajobs-ui]       # jalankan setiap ada push ke branch karsajobs-ui
+  workflow_dispatch:               # bisa juga dijalankan manual dari tab Actions
+
+jobs:
+  lint-dockerfile:
+    runs-on: ubuntu-latest         # runner Linux yang disediakan GitHub
+    steps:
+      - uses: actions/checkout@v4  # ambil source code branch ini
+      - name: Install hadolint     # unduh binary hadolint (linter Dockerfile) dari rilis resminya
+        run: |
+          sudo wget -q -O /usr/local/bin/hadolint https://github.com/hadolint/hadolint/releases/download/v2.12.0/hadolint-Linux-x86_64
+          sudo chmod +x /usr/local/bin/hadolint
+      - name: Lint Dockerfile      # jalankan hadolint terhadap Dockerfile
+        run: hadolint Dockerfile
+
+  build-app-karsajobs-ui:
+    needs: [lint-dockerfile]       # build hanya bila lint berhasil
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write              # izin agar GITHUB_TOKEN bisa push image ke GitHub Packages
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build dan push image # menjalankan script build_push_image_karsajobs_ui.sh
+        env:
+          CR_PAT: ${{ secrets.GITHUB_TOKEN }}   # token login ghcr.io untuk script
+        run: bash build_push_image_karsajobs_ui.sh
