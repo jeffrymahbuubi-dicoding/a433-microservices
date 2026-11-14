@@ -1,0 +1,10 @@
+# Dependencies lokal tidak disalin ke image karena npm ci dijalankan di dalam image
+node_modules
+# Riwayat Git tidak dibutuhkan di dalam image
+.git
+# Dockerfile tidak perlu ada di dalam image
+Dockerfile
+# .dockerignore tidak perlu ada di dalam image
+.dockerignore
+# Script build dan push hanya dipakai di mesin lokal
+build_push_image.sh
