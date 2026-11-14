@@ -1,0 +1,43 @@
+# Continuous Integration untuk branch karsajobs (backend Go) — saran keempat submission.
+# Urutan: lint-dockerfile dan test-app berjalan paralel; build-app-karsajobs hanya berjalan bila keduanya sukses.
+name: CI karsajobs
+
+on:
+  push:
+    branches: [karsajobs]          # jalankan setiap ada push ke branch karsajobs
+  workflow_dispatch:               # bisa juga dijalankan manual dari tab Actions
+
+jobs:
+  lint-dockerfile:
+    runs-on: ubuntu-latest         # runner Linux yang disediakan GitHub
+    steps:
+      - uses: actions/checkout@v4  # ambil source code branch ini
+      - name: Install hadolint     # unduh binary hadolint (linter Dockerfile) dari rilis resminya
+        run: |
+          sudo wget -q -O /usr/local/bin/hadolint https://github.com/hadolint/hadolint/releases/download/v2.12.0/hadolint-Linux-x86_64
+          sudo chmod +x /usr/local/bin/hadolint
+      - name: Lint Dockerfile      # jalankan hadolint terhadap Dockerfile
+        run: hadolint Dockerfile
+
+  test-app:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5  # pasang Go sesuai versi pada go.mod (1.15)
+        with:
+          go-version: '1.15'
+      - name: Unit test            # perintah dari kriteria; -short melewati integration test yang butuh MongoDB
+        run: go test -v -short --count=1 $(go list ./...)
+
+  build-app-karsajobs:
+    needs: [lint-dockerfile, test-app]   # build hanya bila lint dan test berhasil
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write              # izin agar GITHUB_TOKEN bisa push image ke GitHub Packages
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build dan push image # menjalankan script build_push_image_karsajobs.sh
+        env:
+          CR_PAT: ${{ secrets.GITHUB_TOKEN }}   # token login ghcr.io untuk script
+        run: bash build_push_image_karsajobs.sh
