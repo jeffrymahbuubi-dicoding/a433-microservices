@@ -1,0 +1,48 @@
+# StatefulSet untuk MongoDB: Pod memiliki identitas tetap (mongo-0) dan penyimpanan persisten.
+apiVersion: apps/v1                 # versi API untuk StatefulSet
+kind: StatefulSet                   # jenis object: StatefulSet (untuk aplikasi stateful seperti database)
+metadata:
+  name: mongo                       # nama StatefulSet; Pod-nya bernama mongo-0
+  labels:
+    app: mongo
+spec:
+  serviceName: mongo                # Headless Service yang mengatur identitas jaringan Pod
+  replicas: 1                       # satu replica cukup karena PV hanya ReadWriteOnce
+  selector:
+    matchLabels:
+      app: mongo                    # StatefulSet mengelola Pod berlabel app=mongo
+  template:
+    metadata:
+      labels:
+        app: mongo                  # label Pod, harus sama dengan selector
+    spec:
+      terminationGracePeriodSeconds: 10   # waktu tunggu sebelum Pod dihentikan paksa
+      containers:
+        - name: mongo               # nama container
+          image: mongo:4.4          # versi MongoDB yang didukung driver Go karsajobs (mongo-driver v1.4.4)
+          args: ["--config", "/config/mongo.conf"]   # jalankan mongod dengan berkas konfigurasi dari ConfigMap
+          ports:
+            - containerPort: 27017  # port yang dibuka container MongoDB
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME_FILE        # image mongo membaca username root dari berkas ini
+              value: /etc/mongo-credentials/MONGO_ROOT_USERNAME
+            - name: MONGO_INITDB_ROOT_PASSWORD_FILE        # image mongo membaca password root dari berkas ini
+              value: /etc/mongo-credentials/MONGO_ROOT_PASSWORD
+          volumeMounts:
+            - name: mongo-data      # Persistent Volume untuk data MongoDB
+              mountPath: /data/db
+            - name: mongo-config    # ConfigMap (mongo.conf)
+              mountPath: /config
+            - name: mongo-credentials   # Secret (username dan password) sebagai berkas
+              mountPath: /etc/mongo-credentials
+              readOnly: true
+      volumes:
+        - name: mongo-data
+          persistentVolumeClaim:
+            claimName: mongo-pv-claim    # memakai PVC dari mongo-pv-pvc.yml
+        - name: mongo-config
+          configMap:
+            name: mongo-config           # setiap key ConfigMap menjadi berkas (mongo.conf)
+        - name: mongo-credentials
+          secret:
+            secretName: mongo-secret     # setiap key Secret menjadi berkas (MONGO_ROOT_USERNAME, MONGO_ROOT_PASSWORD)

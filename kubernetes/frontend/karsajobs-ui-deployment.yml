@@ -1,0 +1,23 @@
+# Deployment untuk frontend karsajobs-ui (Vue.js).
+apiVersion: apps/v1                 # versi API untuk Deployment
+kind: Deployment                    # jenis object: Deployment
+metadata:
+  name: karsajobs-ui                # nama Deployment
+  labels:
+    app: karsajobs-ui
+spec:
+  replicas: 1                       # jumlah Pod frontend
+  selector:
+    matchLabels:
+      app: karsajobs-ui             # Deployment mengelola Pod berlabel app=karsajobs-ui
+  template:
+    metadata:
+      labels:
+        app: karsajobs-ui           # label Pod, dipakai oleh karsajobs-ui-service
+    spec:
+      containers:
+        - name: karsajobs-ui        # nama container
+          image: ghcr.io/jeffrymahbuubi-dicoding/karsajobs-ui:latest   # image dari GitHub Packages (saran kedua)
+          imagePullPolicy: Always   # selalu tarik image terbaru karena memakai tag latest
+          ports:
+            - containerPort: 8000   # port dev server Vue (npm run serve --port 8000)

@@ -1,0 +1,15 @@
+# Headless Service untuk MongoDB. clusterIP: None membuat DNS "mongo" langsung menunjuk ke Pod StatefulSet,
+# sehingga backend dapat terhubung dengan host "mongo" (MONGO_HOST).
+apiVersion: v1                      # versi API untuk Service
+kind: Service                       # jenis object: Service
+metadata:
+  name: mongo                       # nama Service = hostname MongoDB di dalam Cluster
+  labels:
+    app: mongo
+spec:
+  ports:
+    - port: 27017                   # port standar MongoDB
+      targetPort: 27017             # port container MongoDB
+  selector:
+    app: mongo                      # meneruskan traffic ke Pod berlabel app=mongo
+  clusterIP: None                   # Headless Service (tanpa ClusterIP), dibutuhkan oleh StatefulSet

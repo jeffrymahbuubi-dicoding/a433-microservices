@@ -1,0 +1,12 @@
+# ConfigMap untuk konfigurasi MongoDB (data tidak sensitif).
+# Data diperlakukan sebagai berkas mongo.conf yang nanti di-mount ke /config di dalam container MongoDB.
+apiVersion: v1                      # versi API Kubernetes untuk object ConfigMap
+kind: ConfigMap                     # jenis object: ConfigMap
+metadata:
+  name: mongo-config                # nama ConfigMap, dirujuk oleh StatefulSet
+  labels:
+    app: mongo                      # label untuk mengelompokkan object milik MongoDB
+data:
+  mongo.conf: |                     # key berisi isi berkas mongo.conf
+    storage:
+      dbPath: /data/db              # lokasi penyimpanan data MongoDB (sama dengan mount path Persistent Volume)

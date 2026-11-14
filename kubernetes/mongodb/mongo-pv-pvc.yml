@@ -1,0 +1,30 @@
+# Persistent Volume (PV) dan Persistent Volume Claim (PVC) agar data MongoDB tidak hilang saat Pod dibuat ulang.
+apiVersion: v1                      # versi API untuk PersistentVolume
+kind: PersistentVolume              # jenis object: PersistentVolume (penyimpanan di level Cluster)
+metadata:
+  name: mongo-pv                    # nama PV
+  labels:
+    type: local                     # menandakan penyimpanan lokal di node minikube
+    app: mongo
+spec:
+  storageClassName: manual          # Storage Class "manual": PV ini hanya dipasangkan dengan PVC yang meminta class yang sama
+  capacity:
+    storage: 1Gi                    # kapasitas penyimpanan 1 GiB
+  accessModes:
+    - ReadWriteOnce                 # dapat di-mount baca-tulis oleh satu node
+  hostPath:
+    path: "/mnt/data/mongo"         # direktori di node minikube tempat data disimpan
+---
+apiVersion: v1                      # versi API untuk PersistentVolumeClaim
+kind: PersistentVolumeClaim         # jenis object: PVC (permintaan penyimpanan oleh Pod)
+metadata:
+  name: mongo-pv-claim              # nama PVC, dirujuk oleh StatefulSet
+  labels:
+    app: mongo
+spec:
+  storageClassName: manual          # harus sama dengan PV agar terpasang ke mongo-pv
+  accessModes:
+    - ReadWriteOnce                 # access mode yang diminta, sama dengan PV
+  resources:
+    requests:
+      storage: 1Gi                  # ukuran yang diminta (<= kapasitas PV)

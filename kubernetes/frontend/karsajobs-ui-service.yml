@@ -1,0 +1,15 @@
+# Service NodePort untuk frontend karsajobs-ui agar halaman web dapat dibuka dari browser.
+apiVersion: v1                      # versi API untuk Service
+kind: Service                       # jenis object: Service
+metadata:
+  name: karsajobs-ui                # nama Service frontend
+  labels:
+    app: karsajobs-ui
+spec:
+  type: NodePort                    # membuka port yang sama di setiap node Cluster
+  selector:
+    app: karsajobs-ui               # meneruskan traffic ke Pod frontend
+  ports:
+    - port: 8000                    # port Service di dalam Cluster
+      targetPort: 8000              # port container frontend
+      nodePort: 30000               # custom NodePort untuk membuka aplikasi web

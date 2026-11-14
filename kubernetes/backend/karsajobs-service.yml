@@ -1,0 +1,16 @@
+# Service NodePort untuk backend karsajobs agar API dapat diakses dari luar Cluster (oleh browser pengguna,
+# karena frontend Vue.js memanggil API langsung dari browser melalui VUE_APP_BACKEND).
+apiVersion: v1                      # versi API untuk Service
+kind: Service                       # jenis object: Service
+metadata:
+  name: karsajobs                   # nama Service backend
+  labels:
+    app: karsajobs
+spec:
+  type: NodePort                    # membuka port yang sama di setiap node Cluster
+  selector:
+    app: karsajobs                  # meneruskan traffic ke Pod backend
+  ports:
+    - port: 8080                    # port Service di dalam Cluster
+      targetPort: 8080              # port container backend
+      nodePort: 30001               # custom NodePort (rentang 30000-32767) agar alamat backend tetap
